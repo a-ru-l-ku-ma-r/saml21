@@ -13,7 +13,9 @@
 
 
 // LED PIN Assignment
-#define LED08 PORT_PA02         
+#define LED PORT_PB10         
+
+
 
 
 int main(void)
@@ -21,21 +23,26 @@ int main(void)
 	/* Initialize the SAM system */
 	SystemInit();
 	
-	REG_PORT_DIRSET0 = LED08; 
+	
+	//configure as Output
+	REG_PORT_DIRSET1 = LED; 
 
+
+	
 	while (1)
 	{
 		
-		for(unsigned int i=0; i<=5000;i++)   
+		for(unsigned int i=0; i<=10000;i++)   // loop
 		{
-			REG_PORT_OUTSET0 = LED08;   // set LED19 as High
+			REG_PORT_OUTSET1 = LED;   // set LED as High		
 		}
-			
-		for(unsigned int j=0; j<=5000;j++) // loop
+
+
+		for(unsigned int j=0; j<=10000;j++) // loop
 		{
-			REG_PORT_OUTCLR0 = LED08;  //clear LED19 as Low
+			REG_PORT_OUTCLR1 = LED;  //clear LED as Low
+
 		}
 
 	}
 }
-
