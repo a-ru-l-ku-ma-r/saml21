@@ -1,6 +1,6 @@
 /*
  * LED.c
- * toggling the LED every 5000 counts
+ * toggling the LED every 10000 counts
  */ 
 
 
