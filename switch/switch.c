@@ -25,9 +25,9 @@ int main(void)
 	
 	//configure as Input
 	PORT->Group[0].PINCFG[02].bit.INEN   = 1; 
-  PORT->Group[0].PINCFG[02].bit.PULLEN = 1;
+  	PORT->Group[0].PINCFG[02].bit.PULLEN = 1;
 
-  REG_PORT_OUTSET0 = SWITCH ;
+  	REG_PORT_OUTSET0 = SWITCH ;
 
 
 	
