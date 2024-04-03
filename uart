@@ -1,0 +1,75 @@
+#include "sam.h"
+
+#define UART_SERCOM_MODULE SERCOM0
+#define UART_TX_PIN 0 // PA00
+#define UART_RX_PIN 1 // PA01
+
+#define BAUD_RATE 115200
+
+volatile char received_char;
+
+void SERCOM0_Handler() 
+{
+    if (UART_SERCOM_MODULE->USART.INTFLAG.bit.RXC) 
+    {
+        received_char = UART_SERCOM_MODULE->USART.DATA.reg;
+    }
+}
+
+void init_UART() 
+{
+    // Enable clock for SERCOM0 peripheral
+    PM->APBCMASK.reg |= PM_APBCMASK_SERCOM0;
+
+    // Set PA00 (pin 0) and PA01 (pin 1) to peripheral function C (SERCOM0)
+    PORT->Group[0].PINCFG[UART_TX_PIN].bit.PMUXEN = 1;
+    PORT->Group[0].PMUX[UART_TX_PIN / 2].reg |= PORT_PMUX_PMUXE_C;
+    PORT->Group[0].PINCFG[UART_RX_PIN].bit.PMUXEN = 1;
+    PORT->Group[0].PMUX[UART_RX_PIN / 2].reg |= PORT_PMUX_PMUXO_C;
+
+    // Set UART module to asynchronous mode
+    UART_SERCOM_MODULE->USART.CTRLA.reg = SERCOM_USART_CTRLA_MODE_USART_INT_CLK | SERCOM_USART_CTRLA_FORM(0) | SERCOM_USART_CTRLA_SAMPR(0) | SERCOM_USART_CTRLA_RXPO(1) | SERCOM_USART_CTRLA_TXPO(0);
+
+    // Calculate and set baud rate
+    uint64_t baud_setting = (uint64_t)(65536 * (float)(1 - BAUD_RATE * 16 / (float)SystemCoreClock));
+    UART_SERCOM_MODULE->USART.BAUD.reg = (uint16_t)baud_setting;
+
+    // Enable RX and TX
+    UART_SERCOM_MODULE->USART.CTRLB.reg = SERCOM_USART_CTRLB_RXEN | SERCOM_USART_CTRLB_TXEN;
+
+    // Enable UART
+    UART_SERCOM_MODULE->USART.CTRLA.reg |= SERCOM_USART_CTRLA_ENABLE;
+
+    // Enable RX interrupt
+    UART_SERCOM_MODULE->USART.INTENSET.reg = SERCOM_USART_INTFLAG_RXC;
+    NVIC_EnableIRQ(SERCOM0_IRQn);
+}
+
+void txd_char(char c) 
+{
+    // Wait for buffer to be empty
+    while (!(UART_SERCOM_MODULE->USART.INTFLAG.reg & SERCOM_USART_INTFLAG_DRE));
+    UART_SERCOM_MODULE->USART.DATA.reg = c;
+}
+
+void txd_string(const char *str) 
+{
+    while (*str) {
+        txd_char(*str++);
+    }
+}
+
+int main() {
+    SystemInit();
+
+    init_UART();
+
+    // transmit a test string
+    txd_string("Hello, Rugged Embedded System...!\n");
+
+    while (1) {
+        // Loop indefinitely
+    }
+
+    return 0;
+}
