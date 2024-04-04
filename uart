@@ -8,6 +8,9 @@
 
 volatile char received_char;
 
+void SERCOM0_Handler() ;
+void init_UART() ;
+
 void SERCOM0_Handler() 
 {
     if (UART_SERCOM_MODULE->USART.INTFLAG.bit.RXC) 
