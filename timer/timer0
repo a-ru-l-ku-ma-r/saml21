@@ -1,0 +1,9 @@
+
+
+#include <sam.h>
+
+void init_TIMER0(void)
+{
+  MCLK -> APBAMASK.reg |= 0x42;
+  MCLK -> APBCMASK.reg |= 0x0120;
+}
